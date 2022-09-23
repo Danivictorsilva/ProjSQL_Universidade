@@ -37,6 +37,7 @@ create table Matricula (
 go
 
 /* Criacao Triggers */
+/*
 create trigger TGR_Master
 on Matricula
 for update
@@ -89,6 +90,28 @@ begin
 	end
 end
 go
+*/
+
+CREATE TRIGGER TGR_Media
+ON Matricula
+AFTER UPDATE
+AS
+BEGIN
+	IF ((SELECT Nota_N2 FROM inserted) <> (SELECT Nota_N2 FROM deleted)) OR ((SELECT Nota_N2 FROM deleted) IS NULL)
+	BEGIN
+		DECLARE
+		@N1 FLOAT, @N2 FLOAT, @MEDIA FLOAT, @RA INT, @SIGLA CHAR(3), @ANO INT, @SEMESTRE INT
+		SELECT @N1 = Nota_N1, @N2 = Nota_N2, @RA = RA, @SIGLA = Sigla, @ANO = Data_Ano, @SEMESTRE = Data_Semestre FROM inserted
+		SET @MEDIA = (@N1 + @N2)/2
+
+		UPDATE Matricula SET Nota_Media = @MEDIA
+		WHERE RA = @RA AND Sigla = @SIGLA AND Data_Ano = @ANO AND Data_Semestre = @SEMESTRE
+	END
+END
+GO
+
+DROP TRIGGER TGR_Media
+
 
 /* Insert de dados */
 insert into Aluno (RA, Nome)
@@ -178,94 +201,60 @@ go
 
 
 /* Update Notas segundo semestre */
-update Matricula
-set Nota_N2 = 4.5
-where RA = 1;
+update Matricula set Nota_N2 = 6.0 where RA = 1;
 go
-update Matricula
-set Nota_N2 = 8.0
-where RA = 2;
+update Matricula set Nota_N2 = 4.0 where RA = 2;
 go
-update Matricula
-set Nota_N2 = 3.5
-where RA = 3;
+update Matricula set Nota_N2 = 6.5 where RA = 3;
 go
-update Matricula
-set Nota_N2 = 6.5
-where RA = 4;
+update Matricula set Nota_N2 = 4.5 where RA = 4;
 go
-update Matricula
-set Nota_N2 = 5.0
-where RA = 5;
+update Matricula set Nota_N2 = 8.0 where RA = 5;
 go
-update Matricula
-set Nota_N2 = 3.5
-where RA = 6;
+update Matricula set Nota_N2 = 2.5 where RA = 6;
 go
-update Matricula
-set Nota_N2 = 10.0
-where RA = 7;
+update Matricula set Nota_N2 = 3.0 where RA = 7;
 go
-update Matricula
-set Nota_N2 = 8.5
-where RA = 8;
+update Matricula set Nota_N2 = 2.5 where RA = 8;
 go
-update Matricula
-set Nota_N2 = 1.5
-where RA = 9;
+update Matricula set Nota_N2 = 3.0 where RA = 9;
 go
-update Matricula
-set Nota_N2 = 5.5
-where RA = 10;
+update Matricula set Nota_N2 = 5.0 where RA = 10;
 go
 
 
 /* Update Faltas */
-update Matricula
-set Falta = 45
-where RA = 1;
+update Matricula set Falta = 45 where RA = 1;
 go
-update Matricula
-set Falta = 25
-where RA = 2;
+update Matricula set Falta = 25 where RA = 2;
 go
-update Matricula
-set Falta = 51
-where RA = 3;
+update Matricula set Falta = 51 where RA = 3;
 go
-update Matricula
-set Falta = 92
-where RA = 4;
+update Matricula set Falta = 92 where RA = 4;
 go
-update Matricula
-set Falta = 75
-where RA = 5;
+update Matricula set Falta = 75 where RA = 5;
 go
-update Matricula
-set Falta = 47
-where RA = 6;
+update Matricula set Falta = 47 where RA = 6;
 go
-update Matricula
-set Falta = 22
-where RA = 7;
+update Matricula set Falta = 22 where RA = 7;
 go
-update Matricula
-set Falta = 84
-where RA = 8;
+update Matricula set Falta = 84 where RA = 8;
 go
-update Matricula
-set Falta = 35
-where RA = 9;
+update Matricula set Falta = 35 where RA = 9;
 go
-update Matricula
-set Falta = 25
-where RA = 10;
+update Matricula set Falta = 25 where RA = 10;
 go
 
 /* Vizualizar a tabela matricula */
-select RA, Sigla, Data_Ano, Data_Semestre, Falta, Nota_N1, Nota_N2, Nota_Sub, Nota_Media, Frequencia 'Frequencia (%)', Situacao
+use Universidade;
+go
+
+select RA, Sigla, Data_Ano, Data_Semestre, Falta 'Faltas', Nota_N1, Nota_N2, Nota_Sub, Nota_Media, Frequencia 'Frequencia (%)', Situacao
 from Matricula;
 go
+
+update Matricula set Nota_Media = null
+DROP TRIGGER TGR_Media
 
 /*Consulta 1:  Alunos de uma determinada disciplina */
 select a.RA, a.Nome, m.Nota_N1, m.Nota_N2, m.Nota_Media, m.Frequencia, m.Situacao 
